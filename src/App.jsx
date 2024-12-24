@@ -22,6 +22,7 @@ import PaymentHistory from './pages/finance/PaymentHistory';
 import TenantProfile from './pages/tenants/TenantProfile';
 import PropertyProfile from './pages/properties/PropertyProfile';
 import LandlordProfile from './pages/landlords/LandlordProfile';
+import Settings from './pages/settings/Settings';
 
 const theme = createTheme({
   palette: {
@@ -90,6 +91,7 @@ function App() {
                   <Route path="/tenants/profile/:id" element={<TenantProfile />} />
                   <Route path="/properties/profile/:id" element={<PropertyProfile />} />
                   <Route path="/landlords/profile/:id" element={<LandlordProfile />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Routes>
               </DashboardLayout>
             </ErrorBoundary>

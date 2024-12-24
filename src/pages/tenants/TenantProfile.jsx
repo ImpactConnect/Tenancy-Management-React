@@ -18,7 +18,11 @@ import {
   Home as HomeIcon,
   Edit as EditIcon,
   ArrowBack as ArrowBackIcon,
-  AttachMoney as MoneyIcon
+  AttachMoney as MoneyIcon,
+  Payment as PaymentIcon,
+  CalendarMonth as CalendarIcon,
+  Receipt as ReceiptIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
 import { mockTenants } from '../../data/mockData';
 
@@ -31,6 +35,37 @@ function TenantProfile() {
   if (!tenant) {
     return <Typography>Tenant not found</Typography>;
   }
+
+  const tenantStats = [
+    {
+      title: 'Total Payments',
+      value: '₦1,800,000',
+      subtitle: 'Last 12 months',
+      icon: <PaymentIcon />,
+      color: '#4caf50'
+    },
+    {
+      title: 'Lease Duration',
+      value: '8 months',
+      subtitle: 'Remaining',
+      icon: <CalendarIcon />,
+      color: '#2196f3'
+    },
+    {
+      title: 'Payment History',
+      value: '100%',
+      subtitle: 'On-time payments',
+      icon: <ReceiptIcon />,
+      color: '#ff9800'
+    },
+    {
+      title: 'Outstanding',
+      value: '₦0',
+      subtitle: 'No pending payments',
+      icon: <WarningIcon />,
+      color: '#f44336'
+    }
+  ];
 
   return (
     <Box>
@@ -49,6 +84,41 @@ function TenantProfile() {
           Edit Profile
         </Button>
       </Box>
+
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {tenantStats.map((stat) => (
+          <Grid item xs={12} sm={6} md={3} key={stat.title}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1,
+                      bgcolor: `${stat.color}20`,
+                      color: stat.color,
+                      mr: 2
+                    }}
+                  >
+                    {stat.icon}
+                  </Box>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    {stat.title}
+                  </Typography>
+                </Box>
+                <Typography variant="h4">{stat.value}</Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {stat.subtitle}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
