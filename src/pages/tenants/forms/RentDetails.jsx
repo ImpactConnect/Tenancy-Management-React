@@ -1,9 +1,33 @@
-import { Grid, TextField, MenuItem } from '@mui/material';
+import { Grid, TextField, MenuItem, InputAdornment } from '@mui/material';
 import { Controller } from 'react-hook-form';
+import PropTypes from 'prop-types';
 
-function RentDetails({ control, errors }) {
+function RentDetails({ control }) {
   return (
     <Grid container spacing={3}>
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="property"
+          control={control}
+          rules={{ required: 'Property selection is required' }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Select Property"
+              error={!!error}
+              helperText={error?.message}
+            >
+              {/* Fetch from mockProperties */}
+              <MenuItem value="1">Sunshine Apartments</MenuItem>
+              <MenuItem value="2">Green Valley Estate</MenuItem>
+              <MenuItem value="3">Palm Heights</MenuItem>
+            </TextField>
+          )}
+        />
+      </Grid>
+
       <Grid item xs={12} md={6}>
         <Controller
           name="rentAmount"
@@ -13,62 +37,11 @@ function RentDetails({ control, errors }) {
             <TextField
               {...field}
               fullWidth
-              label="Monthly Rent"
-              error={!!error}
-              helperText={error?.message}
-            />
-          )}
-        />
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="securityDeposit"
-          control={control}
-          rules={{ required: 'Security deposit is required' }}
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              {...field}
-              fullWidth
-              label="Security Deposit"
-              error={!!error}
-              helperText={error?.message}
-            />
-          )}
-        />
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="leaseStartDate"
-          control={control}
-          rules={{ required: 'Lease start date is required' }}
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              {...field}
-              type="date"
-              fullWidth
-              label="Lease Start Date"
-              InputLabelProps={{ shrink: true }}
-              error={!!error}
-              helperText={error?.message}
-            />
-          )}
-        />
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Controller
-          name="leaseEndDate"
-          control={control}
-          rules={{ required: 'Lease end date is required' }}
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              {...field}
-              type="date"
-              fullWidth
-              label="Lease End Date"
-              InputLabelProps={{ shrink: true }}
+              label="Rent Amount"
+              type="number"
+              InputProps={{
+                startAdornment: <InputAdornment position="start">₦</InputAdornment>,
+              }}
               error={!!error}
               helperText={error?.message}
             />
@@ -90,9 +63,71 @@ function RentDetails({ control, errors }) {
               error={!!error}
               helperText={error?.message}
             >
-              <MenuItem value="monthly">Monthly</MenuItem>
-              <MenuItem value="quarterly">Quarterly</MenuItem>
-              <MenuItem value="yearly">Yearly</MenuItem>
+              <MenuItem value="annual">Annual</MenuItem>
+              <MenuItem value="biannual">Bi-Annual</MenuItem>
+            </TextField>
+          )}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="paymentMethod"
+          control={control}
+          rules={{ required: 'Payment method is required' }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Payment Method"
+              error={!!error}
+              helperText={error?.message}
+            >
+              <MenuItem value="bankTransfer">Bank Transfer</MenuItem>
+              <MenuItem value="cash">Cash</MenuItem>
+              <MenuItem value="cheque">Cheque</MenuItem>
+            </TextField>
+          )}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="startDate"
+          control={control}
+          rules={{ required: 'Start date is required' }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              type="date"
+              fullWidth
+              label="Start Date"
+              InputLabelProps={{ shrink: true }}
+              error={!!error}
+              helperText={error?.message}
+            />
+          )}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="duration"
+          control={control}
+          rules={{ required: 'Duration is required' }}
+          render={({ field, fieldState: { error } }) => (
+            <TextField
+              {...field}
+              select
+              fullWidth
+              label="Duration"
+              error={!!error}
+              helperText={error?.message}
+            >
+              <MenuItem value={12}>1 Year</MenuItem>
+              <MenuItem value={24}>2 Years</MenuItem>
+              <MenuItem value={36}>3 Years</MenuItem>
             </TextField>
           )}
         />
@@ -100,5 +135,9 @@ function RentDetails({ control, errors }) {
     </Grid>
   );
 }
+
+RentDetails.propTypes = {
+  control: PropTypes.object.isRequired
+};
 
 export default RentDetails; 

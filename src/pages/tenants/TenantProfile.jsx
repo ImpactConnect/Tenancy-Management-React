@@ -10,7 +10,9 @@ import {
   Chip,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Avatar,
+  Stack
 } from '@mui/material';
 import {
   Email as EmailIcon,
@@ -22,7 +24,10 @@ import {
   Payment as PaymentIcon,
   CalendarMonth as CalendarIcon,
   Receipt as ReceiptIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  Work as WorkIcon,
+  Business as BusinessIcon,
+  Description as DocumentIcon
 } from '@mui/icons-material';
 import { mockTenants } from '../../data/mockData';
 
@@ -30,7 +35,33 @@ function TenantProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const tenant = mockTenants.find(t => t.id === parseInt(id));
+  // Mock expanded tenant data
+  const tenant = {
+    ...mockTenants.find(t => t.id === parseInt(id)),
+    // Additional mock data for new fields
+    workInfo: {
+      employer: 'Tech Solutions Ltd',
+      position: 'Senior Developer',
+      workAddress: '123 Business District, Lagos',
+      workEmail: 'john.doe@techsolutions.com',
+      workPhone: '+234 802 123 4567'
+    },
+    rentDetails: {
+      paymentFrequency: 'Annual',
+      paymentMethod: 'Bank Transfer',
+      duration: '2 Years',
+      startDate: '2024-01-01'
+    },
+    documents: {
+      profilePicture: '/path/to/profile.jpg',
+      idCard: 'National ID Card',
+      additionalDocs: [
+        'Employment Letter',
+        'Bank Statement',
+        'Previous Tenancy Reference'
+      ]
+    }
+  };
 
   if (!tenant) {
     return <Typography>Tenant not found</Typography>;
@@ -46,15 +77,15 @@ function TenantProfile() {
     },
     {
       title: 'Lease Duration',
-      value: '8 months',
-      subtitle: 'Remaining',
+      value: tenant.rentDetails.duration,
+      subtitle: `Started ${new Date(tenant.rentDetails.startDate).toLocaleDateString()}`,
       icon: <CalendarIcon />,
       color: '#2196f3'
     },
     {
-      title: 'Payment History',
-      value: '100%',
-      subtitle: 'On-time payments',
+      title: 'Payment Frequency',
+      value: tenant.rentDetails.paymentFrequency,
+      subtitle: tenant.rentDetails.paymentMethod,
       icon: <ReceiptIcon />,
       color: '#ff9800'
     },
@@ -85,6 +116,7 @@ function TenantProfile() {
         </Button>
       </Box>
 
+      {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {tenantStats.map((stat) => (
           <Grid item xs={12} sm={6} md={3} key={stat.title}>
@@ -121,93 +153,124 @@ function TenantProfile() {
       </Grid>
 
       <Grid container spacing={3}>
+        {/* Personal Information */}
         <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
-              <Typography variant="h5" gutterBottom>
-                {tenant.name}
-              </Typography>
-              <Chip
-                label={tenant.status}
-                color={tenant.status === 'Active' ? 'success' : 'default'}
-                sx={{ mb: 2 }}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Avatar
+                  src={tenant.documents.profilePicture}
+                  sx={{ width: 64, height: 64, mr: 2 }}
+                >
+                  {tenant.name.charAt(0)}
+                </Avatar>
+                <Box>
+                  <Typography variant="h5">{tenant.name}</Typography>
+                  <Chip
+                    label={tenant.status}
+                    color={tenant.status === 'Active' ? 'success' : 'default'}
+                    size="small"
+                  />
+                </Box>
+              </Box>
               <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <EmailIcon sx={{ mr: 1 }} color="action" />
-                <Typography>{tenant.email}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <PhoneIcon sx={{ mr: 1 }} color="action" />
-                <Typography>{tenant.phone}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <HomeIcon sx={{ mr: 1 }} color="action" />
-                <Typography>{tenant.property} - {tenant.unit}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <MoneyIcon sx={{ mr: 1 }} color="action" />
-                <Typography>{tenant.rentAmount} / month</Typography>
-              </Box>
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <EmailIcon sx={{ mr: 1 }} color="action" />
+                  <Typography>{tenant.email}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <PhoneIcon sx={{ mr: 1 }} color="action" />
+                  <Typography>{tenant.phone}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <HomeIcon sx={{ mr: 1 }} color="action" />
+                  <Typography>{tenant.property} - {tenant.unit}</Typography>
+                </Box>
+              </Stack>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* Work Information */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    Lease Information
+                    Work Information
                   </Typography>
-                  <List>
-                    <ListItem divider>
-                      <ListItemText
-                        primary="Lease Period"
-                        secondary={`${new Date(tenant.leaseStart).toLocaleDateString()} - ${new Date(tenant.leaseEnd).toLocaleDateString()}`}
-                      />
-                    </ListItem>
-                    <ListItem divider>
-                      <ListItemText
-                        primary="Last Payment"
-                        secondary={new Date(tenant.lastPayment).toLocaleDateString()}
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText
-                        primary="Payment Status"
-                        secondary={
-                          <Chip
-                            label="Up to date"
-                            size="small"
-                            color="success"
-                          />
-                        }
-                      />
-                    </ListItem>
-                  </List>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <BusinessIcon sx={{ mr: 1 }} color="action" />
+                        <Box>
+                          <Typography variant="subtitle2" color="textSecondary">
+                            Employer
+                          </Typography>
+                          <Typography>{tenant.workInfo.employer}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <WorkIcon sx={{ mr: 1 }} color="action" />
+                        <Box>
+                          <Typography variant="subtitle2" color="textSecondary">
+                            Position
+                          </Typography>
+                          <Typography>{tenant.workInfo.position}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <HomeIcon sx={{ mr: 1 }} color="action" />
+                        <Box>
+                          <Typography variant="subtitle2" color="textSecondary">
+                            Work Address
+                          </Typography>
+                          <Typography>{tenant.workInfo.workAddress}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </CardContent>
               </Card>
             </Grid>
 
+            {/* Documents */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    Recent Activity
+                    Documents
                   </Typography>
                   <List>
                     <ListItem divider>
                       <ListItemText
-                        primary="Rent Payment"
-                        secondary={`Payment received: ${tenant.rentAmount}`}
+                        primary="ID Card"
+                        secondary={tenant.documents.idCard}
                       />
-                      <Typography variant="caption" color="textSecondary">
-                        {new Date(tenant.lastPayment).toLocaleDateString()}
-                      </Typography>
+                      <Button size="small" startIcon={<DocumentIcon />}>
+                        View
+                      </Button>
                     </ListItem>
-                    {/* Add more activity items as needed */}
+                    {tenant.documents.additionalDocs.map((doc, index) => (
+                      <ListItem
+                        key={index}
+                        divider={index !== tenant.documents.additionalDocs.length - 1}
+                      >
+                        <ListItemText
+                          primary={doc}
+                          secondary={`Uploaded document ${index + 1}`}
+                        />
+                        <Button size="small" startIcon={<DocumentIcon />}>
+                          View
+                        </Button>
+                      </ListItem>
+                    ))}
                   </List>
                 </CardContent>
               </Card>

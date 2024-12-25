@@ -1,88 +1,120 @@
-import { useState } from 'react';
-import {
-  Grid,
-  Button,
-  Typography,
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Paper
-} from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  Delete as DeleteIcon,
-  InsertDriveFile as FileIcon
-} from '@mui/icons-material';
+import { Grid, Button, Box, Typography, IconButton } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
+import { CloudUpload as UploadIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-function DocumentUpload({ control, errors }) {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+function DocumentUpload({ control }) {
+  const [previewUrls, setPreviewUrls] = useState({
+    profilePicture: null,
+    idCard: null,
+    additionalDocs: []
+  });
 
-  const handleFileUpload = (event, onChange) => {
-    const files = Array.from(event.target.files);
-    const newFiles = files.map(file => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: (file.size / 1024 / 1024).toFixed(2), // Convert to MB
-      file
-    }));
+  const handleFileChange = (onChange, field, multiple = false) => (event) => {
+    const files = event.target.files;
+    if (!files) return;
 
-    setUploadedFiles(prev => [...prev, ...newFiles]);
-    onChange(newFiles); // Update form value
-  };
-
-  const handleDelete = (fileId, onChange) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-    onChange(uploadedFiles.filter(file => file.id !== fileId));
-  };
-
-  const renderFileSize = (size) => {
-    return `${size} MB`;
+    if (multiple) {
+      // Handle multiple files
+      const newFiles = Array.from(files);
+      const newUrls = newFiles.map(file => URL.createObjectURL(file));
+      
+      setPreviewUrls(prev => ({
+        ...prev,
+        [field]: [...(prev[field] || []), ...newUrls]
+      }));
+      onChange(newFiles);
+    } else {
+      // Handle single file
+      const file = files[0];
+      const url = URL.createObjectURL(file);
+      setPreviewUrls(prev => ({
+        ...prev,
+        [field]: url
+      }));
+      onChange(file);
+    }
   };
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
+        <Typography variant="h6" gutterBottom>Required Documents</Typography>
+      </Grid>
+
+      <Grid item xs={12} md={6}>
         <Controller
-          name="documents"
+          name="profilePicture"
           control={control}
-          defaultValue={[]}
-          render={({ field: { onChange, value } }) => (
+          rules={{ required: 'Profile picture is required' }}
+          render={({ field: { onChange }, fieldState: { error } }) => (
             <Box>
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                style={{ display: 'none' }}
-                id="document-upload"
-                onChange={(e) => handleFileUpload(e, onChange)}
-              />
-              <label htmlFor="document-upload">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  startIcon={<UploadIcon />}
-                  fullWidth
-                  sx={{ height: 100, border: '2px dashed' }}
-                >
-                  <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="body1" gutterBottom>
-                      Drop files here or click to upload
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Supported formats: PDF, DOC, DOCX, JPG, PNG
-                    </Typography>
-                  </Box>
-                </Button>
-              </label>
-              {errors.documents && (
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<UploadIcon />}
+                fullWidth
+              >
+                Upload Profile Picture
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange(onChange, 'profilePicture')}
+                />
+              </Button>
+              {error && (
                 <Typography color="error" variant="caption">
-                  {errors.documents.message}
+                  {error.message}
                 </Typography>
+              )}
+              {previewUrls.profilePicture && (
+                <Box mt={2}>
+                  <img
+                    src={previewUrls.profilePicture}
+                    alt="Profile Preview"
+                    style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
+        />
+      </Grid>
+
+      <Grid item xs={12} md={6}>
+        <Controller
+          name="idCard"
+          control={control}
+          rules={{ required: 'ID Card is required' }}
+          render={({ field: { onChange }, fieldState: { error } }) => (
+            <Box>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<UploadIcon />}
+                fullWidth
+              >
+                Upload ID Card
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*,.pdf"
+                  onChange={handleFileChange(onChange, 'idCard')}
+                />
+              </Button>
+              {error && (
+                <Typography color="error" variant="caption">
+                  {error.message}
+                </Typography>
+              )}
+              {previewUrls.idCard && (
+                <Box mt={2}>
+                  <Typography variant="caption">
+                    ID Card uploaded successfully
+                  </Typography>
+                </Box>
               )}
             </Box>
           )}
@@ -90,50 +122,63 @@ function DocumentUpload({ control, errors }) {
       </Grid>
 
       <Grid item xs={12}>
-        {uploadedFiles.length > 0 && (
-          <Paper variant="outlined">
-            <List>
-              {uploadedFiles.map((file) => (
-                <ListItem key={file.id}>
-                  <FileIcon sx={{ mr: 2 }} />
-                  <ListItemText
-                    primary={file.name}
-                    secondary={renderFileSize(file.size)}
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      color="error"
-                      onClick={() => handleDelete(file.id, control.setValue)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        )}
-      </Grid>
-
-      <Grid item xs={12}>
-        <Typography variant="subtitle2" color="textSecondary">
-          Required Documents:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• Valid ID (National ID, Driver's License, or Passport)" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Proof of Income (Pay Slip or Bank Statement)" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Proof of Employment" />
-          </ListItem>
-        </List>
+        <Controller
+          name="additionalDocuments"
+          control={control}
+          render={({ field: { onChange } }) => (
+            <Box>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<UploadIcon />}
+                fullWidth
+              >
+                Upload Additional Documents
+                <input
+                  type="file"
+                  hidden
+                  multiple
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange(onChange, 'additionalDocs', true)}
+                />
+              </Button>
+              {previewUrls.additionalDocs?.length > 0 && (
+                <Box mt={2}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Uploaded Documents:
+                  </Typography>
+                  {previewUrls.additionalDocs.map((_, index) => (
+                    <Box key={index} display="flex" alignItems="center" mt={1}>
+                      <Typography variant="caption">
+                        Document {index + 1}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newDocs = [...previewUrls.additionalDocs];
+                          newDocs.splice(index, 1);
+                          setPreviewUrls(prev => ({
+                            ...prev,
+                            additionalDocs: newDocs
+                          }));
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+        />
       </Grid>
     </Grid>
   );
 }
+
+DocumentUpload.propTypes = {
+  control: PropTypes.object.isRequired
+};
 
 export default DocumentUpload; 
